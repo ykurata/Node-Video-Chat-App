@@ -19,4 +19,13 @@ app.get("/:room", (req, res) => {
   res.render('room', { roomId: req.params.room });
 })
 
+// Set up event listener that says whenever we join the room, we pass roomId and userId.
+// In the frontend, as soon as roomId and userId set up, we call join-room event 
+// and then it's call all the code inside socket.io
+io.on('connection', socket => {
+  socket.on('join-room', (roomId, userId) => {
+    console.log(roomId, userId);
+  })
+})
+
 server.listen(3000);
