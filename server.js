@@ -24,7 +24,8 @@ app.get("/:room", (req, res) => {
 // and then it's call all the code inside socket.io
 io.on('connection', socket => {
   socket.on('join-room', (roomId, userId) => {
-    console.log(roomId, userId);
+    socket.join(roomId);
+    socket.to(roomId).broadcast.emit('user-connected', userId);
   })
 })
 
