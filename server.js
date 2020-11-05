@@ -32,6 +32,10 @@ io.on('connection', socket => {
     // Send it to everyone else in the same room, but don't send it back to me.
     // because we already know we connected.
     socket.to(roomId).broadcast.emit('user-connected', userId);
+
+    socket.on('disconnect', () => {
+      socket.to(roomId).broadcast.emit('user-disconnected', userId);
+    })
   })
 })
 

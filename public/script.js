@@ -7,17 +7,33 @@ const myPeer = new Peer(undefined, {  // Pass id === undefined because we genera
 });
 const myVideo = document.createElement('video');
 myVideo.muted = true;  // Mute my own video
+const peers = {};
 
 navigator.mediaDevices.getUserMedia({
   video: true,
   audio: true
 }).then(stream => {  // Promise. Pass stream
   addVideoStream(myVideo, stream)
+
+  myPeer.on('call', call => {
+    call.answer(stream);
+
+    const video = document.createElement('video');
+    call.on('stream', userVideoStream => {
+      addVideoStream(video, userVideoStream);
+    })
+  });
+
   // Allow ourselves to connect to ohter users
   socket.on('user-connnected', userId => {
     connectToNewUser(userId, stream);
   });
 })
+
+socket.on('user-disconnected', userId => {
+  if (peers[userId]) peers[userId].close();
+})
+
 
 // Connect to this peer server.
 // As soon as we conect to peer server and get back on ID, we want to run this code.
@@ -36,7 +52,8 @@ function connectToNewUser(userId, stream) {
   });
   call.on('close', () => {
     video.remove();
-  })
+  });
+  peers[userId] = call;
 }
 
 function addVideoStream(video, stream) {
